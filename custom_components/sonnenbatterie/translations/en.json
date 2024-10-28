@@ -81,7 +81,8 @@
             "state_system_status": {
                 "name": "System Status",
                 "state": {
-                    "ongrid": "On Grid"
+                    "ongrid": "On Grid",
+                    "offgrid": "Off Grid"
                 }
             },
             "state_operating_mode": {
