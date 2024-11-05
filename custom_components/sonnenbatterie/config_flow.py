@@ -22,6 +22,14 @@ from homeassistant.const import (
     CONF_SCAN_INTERVAL,
 )
 
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
+BATTERIE_HOST = os.getenv("BATTERIE_HOST", "X")
+API_READ_TOKEN = os.getenv("API_READ_TOKEN", "X")
+API_WRITE_TOKEN = os.getenv("API_WRITE_TOKEN", "X")
+
 
 class SonnenbatterieFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     def __init__(self):
@@ -34,7 +42,15 @@ class SonnenbatterieFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         #    return self.async_abort(reason="single_instance_allowed")
 
         if not user_input:
-            return self._show_form()
+            API_TOKEN = API_WRITE_TOKEN if API_WRITE_TOKEN != "X" else API_READ_TOKEN
+            if BATTERIE_HOST == "X" or API_TOKEN == "X":
+                print(f"host: {BATTERIE_HOST} WRITE: {API_WRITE_TOKEN} READ: {API_READ_TOKEN}")
+                raise ValueError(
+                    "Set BATTERIE_HOST & API_READ_TOKEN or API_WRITE_TOKEN in .env See sonnenbatterie package env.example"
+                )
+            user_input = {CONF_USERNAME:'APIToken', CONF_PASSWORD:API_TOKEN, CONF_IP_ADDRESS:BATTERIE_HOST}
+
+#            return self._show_form()
 
         username = user_input[CONF_USERNAME]
         password = user_input[CONF_PASSWORD]
