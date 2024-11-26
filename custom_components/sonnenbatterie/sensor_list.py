@@ -36,6 +36,53 @@ def generate_powermeter_sensors(_coordinator):
         "w_l3",
         "w_total",
     }
+    API_V2 = [
+        {"a_l1":4.223999977111816,
+         "a_l2":0,
+         "a_l3":0,
+        #  "a_total":0,
+        #  "channel":1,
+        #  "deviceid":0,
+        #  "direction":"production","error":0,
+        #  "frequency":0,
+        #  "kwh_exported":0,
+        #  "kwh_imported":1401.9000244140625,
+         "v_l1_l2":0,
+         "v_l1_n":235.3000030517578,
+         "v_l2_l3":0,
+         "v_l2_n":0,
+         "v_l3_l1":0,
+         "v_l3_n":0,
+        #  "va_total":993.2999877929688,
+        #  "var_total":-344.29998779296875,
+         "w_l1":931.7999877929688,
+         "w_l2":0,
+         "w_l3":0,
+         "w_total":931.7999877929688},
+        {
+         "a_l1":2.296999931335449,
+         "a_l2":0,"a_l3":0,
+        #  "a_total":0,
+        #  "channel":2,
+        #  "deviceid":1,
+        #  "direction":"consumption",
+        #  "error":0,
+        #  "frequency":0,
+        #  "kwh_exported":0,
+        #  "kwh_imported":335,
+         "v_l1_l2":0,
+         "v_l1_n":235.3000030517578,
+         "v_l2_l3":0,
+         "v_l2_n":0,
+         "v_l3_l1":0,
+         "v_l3_n":0,
+        #  "va_total":540.2999877929688,
+        #  "var_total":-80.9000015258789,
+         "w_l1":-534.2999877929688,
+         "w_l2":0,
+         "w_l3":0,
+         "w_total":-534.2999877929688
+        }]
 
     """powermeter values"""
     for index, meter in enumerate(_coordinator.latestData["powermeter"]):
@@ -87,7 +134,7 @@ SENSORS: tuple[SonnenbatterieSensorEntityDescription, ...] = (
     # main sensor
     SonnenbatterieSensorEntityDescription(
         key="state_sonnenbatterie",
-        options=["standby", "charging", "discharging"],
+        options=["standby", "charging", "discharging", "charged", "discharged"],
         device_class=SensorDeviceClass.ENUM,
         value_fn=lambda coordinator: coordinator.latestData.get("battery_info", {}).get(
             "current_state"

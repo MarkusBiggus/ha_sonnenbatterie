@@ -80,7 +80,10 @@ class SonnenBatterieCoordinator(DataUpdateCoordinator):
         so entities can quickly look up their data.
         """
         try:  # ignore errors here, may be transient
-            self.latestData["battery"] = await self.hass.async_add_executor_job(
+            self.latestData["status"] = await self.hass.async_add_executor_job(
+                self.sbInst.get_status
+            )
+            self.latestData["battery_info"] = await self.hass.async_add_executor_job(
                 self.sbInst.get_battery
             )
             self.latestData["battery_system"] = await self.hass.async_add_executor_job(
@@ -92,13 +95,10 @@ class SonnenBatterieCoordinator(DataUpdateCoordinator):
             self.latestData["powermeter"] = await self.hass.async_add_executor_job(
                 self.sbInst.get_powermeter
             )
-            self.latestData["status"] = await self.hass.async_add_executor_job(
-                self.sbInst.get_status
-            )
             self.latestData["system_data"] = await self.hass.async_add_executor_job(
                 self.sbInst.get_systemdata
             )
-            
+
             if(isinstance(self.latestData["powermeter"],dict)):
                 try:
                     #some new firmware of sonnenbatterie seems to send a dictionary, but we work with a list, so reformat :)

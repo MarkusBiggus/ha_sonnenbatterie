@@ -52,8 +52,8 @@ class SonnenbatterieFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
 #            return self._show_form()
 
-        username = user_input[CONF_USERNAME]
-        password = user_input[CONF_PASSWORD]
+        username = user_input[CONF_USERNAME] # not used
+        password = user_input[CONF_PASSWORD] # API token
         ipaddress = user_input[CONF_IP_ADDRESS]
 
         try:
@@ -69,9 +69,10 @@ class SonnenbatterieFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             #    Abode, username, password, True, True, True, cache
             # )
 
-        except:
-            e = traceback.format_exc()
-            LOGGER.error("Unable to connect to sonnenbatterie: %s", e)
+        except Exception as e:
+        #    e = traceback.format_exc()
+        #    LOGGER.error("Unable to connect to sonnenbatterie: %s", e)
+            LOGGER.error(f'Unable to connect to sonnenbatterie: {e}')
             # if ex.errcode == 400:
             #    return self._show_form({"base": "invalid_credentials"})
             return self._show_form({"base": "connection_error"})
