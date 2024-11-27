@@ -18,8 +18,16 @@
                 },
                 "title": "Enter your Sonnenbatterie-login information",
                 "description": "Normally you find your password on the side of your sonnenbatterie near the main switch."
+            },
+            "token": {
+                "data": {
+                    "token": "API Token",
+                    "ip_address": "IP-Address",
+                    "scan_interval": "Update interval (seconds)"
+                },
+                "title": "Enter your Sonnenbatterie API information",
+                "description": "Enable API and generate a token in the sonnenbatterie admin portal."
             }
-
         }
     },
     "options": {
@@ -39,7 +47,9 @@
                  "state": {
                     "standby": "Standby",
                     "charging": "Charging",
-                    "discharging": "Discharging"
+                    "discharging": "Discharging",
+                    "charged": "Charged",
+                    "discharged" : "Discharged"
                 }
             },
             "state_consumption_avg": {
@@ -82,7 +92,9 @@
                 "name": "System Status",
                 "state": {
                     "ongrid": "On Grid",
-                    "offgrid": "Off Grid"
+                    "offgrid": "Off Grid",
+                    "config": "Config",
+                    "critical error": "Critical Error"
                 }
             },
             "state_operating_mode": {

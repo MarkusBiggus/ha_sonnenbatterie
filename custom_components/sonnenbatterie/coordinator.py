@@ -89,7 +89,7 @@ class SonnenBatterieCoordinator(DataUpdateCoordinator):
             self.latestData["battery_system"] = await self.hass.async_add_executor_job(
                 self.sbInst.get_batterysystem
             )
-            self.latestData["inverter"] = await self.hass.async_add_executor_job(
+            self.latestData["inverter"]["status"] = await self.hass.async_add_executor_job(
                 self.sbInst.get_inverter
             )
             self.latestData["powermeter"] = await self.hass.async_add_executor_job(
@@ -106,13 +106,15 @@ class SonnenBatterieCoordinator(DataUpdateCoordinator):
                     for index,dictIndex in enumerate(self.latestData["powermeter"]):
                         newPowerMeters.append(self.latestData["powermeter"][dictIndex])
                     self.latestData["powermeter"]=newPowerMeters
-                    #LOGGER.warning("ReRead powermeter as it returned wrong from battery.")
-                except:
-                    e = traceback.format_exc()
-                    LOGGER.error(e)
-        except:
-            e = traceback.format_exc()
-            LOGGER.error(e)
+                    LOGGER.warning("ReFormat powermeter as it returned Dict from battery.")
+                except Exception as e:
+                #    e = traceback.format_exc()
+                #    LOGGER.error(e)
+                    LOGGER.exception(e)
+        except Exception as e:
+        #    e = traceback.format_exc()
+        #    LOGGER.error(e)
+            LOGGER.exception(e)
 
         if self.debug:
             self.send_all_data_to_log()
@@ -164,7 +166,7 @@ class SonnenBatterieCoordinator(DataUpdateCoordinator):
         if not self.fullLogsAlreadySent:
             LOGGER.warning(f"Powermeter data:\n{self.latestData['powermeter']}")
             LOGGER.warning(f"Battery system data:\n{self.latestData['battery_system']}")
-            LOGGER.warning(f"Inverted:\n{self.latestData['inverter']}")
+            LOGGER.warning(f"Inverter:\n{self.latestData['inverter']}")
             LOGGER.warning(f"System data:\n{self.latestData['system_data']}")
             LOGGER.warning(f"Status:\n{self.latestData['status']}")
             LOGGER.warning(f"Battery:\n{self.latestData['battery']}")

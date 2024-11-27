@@ -20,6 +20,7 @@ from homeassistant.const import (
     CONF_USERNAME,
     CONF_IP_ADDRESS,
     CONF_SCAN_INTERVAL,
+    CONF_API_TOKEN,
 )
 
 import os
@@ -41,19 +42,10 @@ class SonnenbatterieFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         # if self._async_current_entries():
         #    return self.async_abort(reason="single_instance_allowed")
 
-        if not user_input:
-            API_TOKEN = API_WRITE_TOKEN if API_WRITE_TOKEN != "X" else API_READ_TOKEN
-            if BATTERIE_HOST == "X" or API_TOKEN == "X":
-                print(f"host: {BATTERIE_HOST} WRITE: {API_WRITE_TOKEN} READ: {API_READ_TOKEN}")
-                raise ValueError(
-                    "Set BATTERIE_HOST & API_READ_TOKEN or API_WRITE_TOKEN in .env See sonnenbatterie package env.example"
-                )
-            user_input = {CONF_USERNAME:'APIToken', CONF_PASSWORD:API_TOKEN, CONF_IP_ADDRESS:BATTERIE_HOST}
+#        return self._show_form()
 
-#            return self._show_form()
-
-        username = user_input[CONF_USERNAME] # not used
-        password = user_input[CONF_PASSWORD] # API token
+        username = user_input[CONF_USERNAME]
+        password = user_input[CONF_PASSWORD]
         ipaddress = user_input[CONF_IP_ADDRESS]
 
         try:
@@ -69,8 +61,8 @@ class SonnenbatterieFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             #    Abode, username, password, True, True, True, cache
             # )
 
-        except Exception as e:
-        #    e = traceback.format_exc()
+        except Exception:
+            e = traceback.format_exc()
         #    LOGGER.error("Unable to connect to sonnenbatterie: %s", e)
             LOGGER.error(f'Unable to connect to sonnenbatterie: {e}')
             # if ex.errcode == 400:
@@ -95,13 +87,67 @@ class SonnenbatterieFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             errors=errors if errors else {},
         )
 
+    async def async_step_token(self, user_input=None):
+        """Handle a flow initialized by the user."""
+        # if self._async_current_entries():
+        #    return self.async_abort(reason="single_instance_allowed")
+
+        if not user_input:
+            API_TOKEN = API_WRITE_TOKEN if API_WRITE_TOKEN != "X" else API_READ_TOKEN
+            if BATTERIE_HOST == "X" or API_TOKEN == "X":
+                print(f"host: {BATTERIE_HOST} WRITE: {API_WRITE_TOKEN} READ: {API_READ_TOKEN}")
+                raise ValueError(
+                    "Set BATTERIE_HOST & API_READ_TOKEN or API_WRITE_TOKEN in .env See sonnenbatterie package env.example"
+                )
+            user_input = {CONF_API_TOKEN:API_TOKEN, CONF_IP_ADDRESS:BATTERIE_HOST}
+
+#            return self._show_form_B()
+
+        apitoken = user_input[CONF_API_TOKEN]
+        ipaddress = user_input[CONF_IP_ADDRESS]
+
+        try:
+
+            def _internal_setup(_apitoken, _ipaddress):
+                return sonnenbatterie(_apitoken, _ipaddress) #API V2
+
+            sonnen_inst = await self.hass.async_add_executor_job(
+                _internal_setup, apitoken, ipaddress
+            )
+
+        except Exception:
+            e = traceback.format_exc()
+        #    LOGGER.error("Unable to connect to sonnenbatterie: %s", e)
+            LOGGER.error(f'Unable to connect to sonnenbatterie: {e}')
+            # if ex.errcode == 400:
+            #    return self._show_form({"base": "invalid_credentials"})
+            return self._show_form_B({"base": "connection_error"})
+
+        return self.async_create_entry(
+            title=user_input[CONF_IP_ADDRESS],
+            data={
+                CONF_API_TOKEN: apitoken,
+                CONF_IP_ADDRESS: ipaddress,
+            },
+        )
+
+    @callback
+    def _show_form_B(self, errors=None):
+        """Show token form to the user."""
+        return self.async_show_form(
+            step_id="token",
+            data_schema=self.data_schema,
+            errors=errors if errors else {},
+        )
+
     async def async_step_import(self, import_config):
         """Import a config entry from configuration.yaml."""
         # if self._async_current_entries():
         #    LOGGER.warning("Only one configuration of abode is allowed.")
         #    return self.async_abort(reason="single_instance_allowed")
 
-        return await self.async_step_user(import_config)
+    #????    return await self.async_step_user(import_config)
+        return await self.async_step_token(import_config)
 
     @staticmethod
     @callback

@@ -18,8 +18,16 @@
                 },
                 "title": "Gib deine Sonnenbatterie-Anmeldeinformationen ein",
                 "description": "Dein Passwort findest du normalerweise an der Seite deiner Sonnenbatterie in der Nähe des Hauptschalters."
+            },
+            "token": {
+                "data": {
+                    "token": "API Token",
+                    "ip_address": "IP-Adresse",
+                    "scan_interval": "Aktualisierungsinterval (Sekunden)"
+                },
+                "title": "Gib deine Sonnenbatterie API informationen ein",
+                "description": "API aktivieren und Token im sonnenbatterie Admin-Portal generieren."
             }
-
         }
     },
     "options": {
@@ -39,9 +47,12 @@
                  "state": {
                     "standby": "Standby",
                     "charging": "Lädt",
-                    "discharging": "Entlädt"
+                    "discharging": "Entlädt",
+                    "charged": "Aufgeladen",
+                    "discharged" : "Abgefeuert"
                 }
             },
+
             "state_consumption_avg": {
                 "name": "Durchschnittlicher Verbrauch"
             },
@@ -82,7 +93,9 @@
                 "name": "Systemstatus",
                 "state": {
                     "ongrid": "Am Netz",
-                    "offgrid": "Ab Netz"
+                    "offgrid": "Ab Netz",
+                    "config": "Konfig",
+                    "critical error": "Kritischer Fehler"
                 }
             },
             "state_operating_mode": {
