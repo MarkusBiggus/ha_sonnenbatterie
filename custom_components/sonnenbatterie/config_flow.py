@@ -41,8 +41,9 @@ class SonnenbatterieFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         """Handle a flow initialized by the user."""
         # if self._async_current_entries():
         #    return self.async_abort(reason="single_instance_allowed")
+        if not user_input:
 
-#        return self._show_form()
+            return self._show_form()
 
         username = user_input[CONF_USERNAME]
         password = user_input[CONF_PASSWORD]
@@ -93,15 +94,15 @@ class SonnenbatterieFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         #    return self.async_abort(reason="single_instance_allowed")
 
         if not user_input:
-            API_TOKEN = API_WRITE_TOKEN if API_WRITE_TOKEN != "X" else API_READ_TOKEN
-            if BATTERIE_HOST == "X" or API_TOKEN == "X":
-                print(f"host: {BATTERIE_HOST} WRITE: {API_WRITE_TOKEN} READ: {API_READ_TOKEN}")
-                raise ValueError(
-                    "Set BATTERIE_HOST & API_READ_TOKEN or API_WRITE_TOKEN in .env See sonnenbatterie package env.example"
-                )
-            user_input = {CONF_API_TOKEN:API_TOKEN, CONF_IP_ADDRESS:BATTERIE_HOST}
+            # API_TOKEN = API_WRITE_TOKEN if API_WRITE_TOKEN != "X" else API_READ_TOKEN
+            # if BATTERIE_HOST == "X" or API_TOKEN == "X":
+            #     print(f"host: {BATTERIE_HOST} WRITE: {API_WRITE_TOKEN} READ: {API_READ_TOKEN}")
+            #     raise ValueError(
+            #         "Set BATTERIE_HOST & API_READ_TOKEN or API_WRITE_TOKEN in .env See sonnenbatterie package env.example"
+            #     )
+            # user_input = {CONF_API_TOKEN:API_TOKEN, CONF_IP_ADDRESS:BATTERIE_HOST}
 
-#            return self._show_form_B()
+            return self._show_form_B()
 
         apitoken = user_input[CONF_API_TOKEN]
         ipaddress = user_input[CONF_IP_ADDRESS]

@@ -6,7 +6,7 @@
         "error": {
             "connection_error": "Es kann keine Verbindung zur Sonnenbatterie hergestellt werden.",
             "identifier_exists": "Das Konto ist bereits registriert.",
-            "invalid_credentials": "Ung\u00fcltige Anmeldeinformationen"
+            "invalid_credentials": "Ung\u00fcltige Anmeldeinformationen/token"
         },
         "step": {
             "user": {

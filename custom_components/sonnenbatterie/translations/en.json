@@ -6,7 +6,7 @@
         "error": {
             "connection_error": "No connection to the Sonnenbatterie could be established",
             "identifier_exists": "Account already exists",
-            "invalid_credentials": "Invalid login"
+            "invalid_credentials": "Invalid login/token"
         },
         "step": {
             "user": {

@@ -280,6 +280,17 @@ SENSORS: tuple[SonnenbatterieSensorEntityDescription, ...] = (
             "OperatingMode"
         ),
     ),
+    SonnenbatterieSensorEntityDescription(
+        key="state_backup_buffer",
+        legacy_key="backup_buffer",
+        icon="mdi:battery-heart-variant",
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement="%",
+        device_class=SensorDeviceClass.BATTERY,
+        value_fn=lambda coordinator: coordinator.latestData.get("status", {}).get(
+            "BackupBuffer", 0
+        ),
+    ),
     ###########################
     ### -- advanced sensors ###
     ###
@@ -358,11 +369,9 @@ SENSORS: tuple[SonnenbatterieSensorEntityDescription, ...] = (
         state_class=SensorStateClass.MEASUREMENT,
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda coordinator: (
-            coordinator.latestData.get("battery", {})
+            coordinator.latestData.get("battery_info", {})
             .get("measurements", {})
             .get("battery_status", {})
-            .get("cyclecount")
-            or coordinator.latestData.get("battery_info", {})
             .get("cyclecount")
         ),
     ),
@@ -374,12 +383,10 @@ SENSORS: tuple[SonnenbatterieSensorEntityDescription, ...] = (
         device_class=SensorDeviceClass.BATTERY,
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda coordinator: (
-            coordinator.latestData.get("battery", {})
+            coordinator.latestData.get("battery_info", {})
             .get("measurements", {})
             .get("battery_status", {})
             .get("stateofhealth")
-            or coordinator.latestData.get("battery_info", {})
-            .get("relativestateofcharge")
         ),
     ),
     SonnenbatterieSensorEntityDescription(
@@ -434,6 +441,17 @@ SENSORS: tuple[SonnenbatterieSensorEntityDescription, ...] = (
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda coordinator: coordinator.latestData.get("battery_info", {}).get(
             "remaining_capacity_usable"
+        ),
+        entity_registry_enabled_default=False,
+    ),
+    SonnenbatterieSensorEntityDescription(
+        key="battery_backup_buffer_usable",
+        legacy_key="backup_buffer_usable",
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement="W",
+        device_class=SensorDeviceClass.POWER,
+        value_fn=lambda coordinator: coordinator.latestData.get("battery_info", {}).get(
+            "backup_buffer_usable", 0
         ),
         entity_registry_enabled_default=False,
     ),
