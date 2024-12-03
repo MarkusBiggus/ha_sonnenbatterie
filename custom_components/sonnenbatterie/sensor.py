@@ -6,6 +6,7 @@ from homeassistant.components.sensor import (
     SensorEntity,
 )
 from homeassistant.helpers.typing import StateType
+from homeassistant.core import callback
 
 from .coordinator import SonnenBatterieCoordinator
 from sonnenbatterie import sonnenbatterie
@@ -34,7 +35,6 @@ async def async_unload_entry(hass, entry):
     ## we dont have anything special going on.. unload should just work, right?
     ##bridge = hass.data[DOMAIN].pop(entry.data['host'])
     return
-
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
     """Set up the sensor platform."""

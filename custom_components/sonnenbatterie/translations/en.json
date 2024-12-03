@@ -23,6 +23,7 @@
                 "data": {
                     "token": "API Token",
                     "ip_address": "IP-Address",
+                    "ip_port": "IP-Port",
                     "scan_interval": "Update interval (seconds)"
                 },
                 "title": "Enter your Sonnenbatterie API information",

@@ -5,7 +5,7 @@ from homeassistant.const import (
     CONF_PASSWORD,
     CONF_USERNAME,
     CONF_IP_ADDRESS,
-    CONF_SCAN_INTERVAL,
+    CONF_API_TOKEN,
 )
 
 LOGGER = logging.getLogger(__package__)
@@ -21,15 +21,27 @@ CONFIG_SCHEMA_A = vol.Schema(
     }
 )
 
-CONFIG_SCHEMA = vol.Schema(
-    {DOMAIN: CONFIG_SCHEMA_A},
-    extra=vol.ALLOW_EXTRA,
+CONFIG_SCHEMA_B = vol.Schema(
+    {
+        vol.Optional(CONF_USERNAME, default='api_token'): str,
+        vol.Required(CONF_API_TOKEN): str,
+        vol.Required(CONF_IP_ADDRESS): str,
+    }
 )
+
+# CONFIG_SCHEMA = vol.Schema(
+#     {DOMAIN: CONFIG_SCHEMA_A},
+#     extra=vol.ALLOW_EXTRA,
+# )
+
+# CONFIG_B_SCHEMA = vol.Schema(
+#     {DOMAIN: CONFIG_SCHEMA_B},
+#     extra=vol.ALLOW_EXTRA,
+# )
 
 ATTR_SONNEN_DEBUG = "sonnenbatterie_debug"
 DEFAULT_SONNEN_DEBUG = False
 PLATFORMS = ["sensor"]
-
 
 def flatten_obj(prefix, seperator, obj):
     result = {}

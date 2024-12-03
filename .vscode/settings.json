@@ -1,0 +1,9 @@
+{
+    "python.analysis.extraPaths": [
+        "~/core/homeassistant",
+        "~/core"
+    ],
+    "python.analysis.include": [
+        "~/core/homeassistant"
+    ]
+}

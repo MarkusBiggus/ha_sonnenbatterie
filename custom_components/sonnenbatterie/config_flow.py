@@ -21,26 +21,18 @@ from homeassistant.const import (
     CONF_IP_ADDRESS,
     CONF_SCAN_INTERVAL,
     CONF_API_TOKEN,
+    CONF_DEVICE_ID,
 )
-
-import os
-from dotenv import load_dotenv
-load_dotenv()
-
-BATTERIE_HOST = os.getenv("BATTERIE_HOST", "X")
-API_READ_TOKEN = os.getenv("API_READ_TOKEN", "X")
-API_WRITE_TOKEN = os.getenv("API_WRITE_TOKEN", "X")
-
 
 class SonnenbatterieFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     def __init__(self):
         """Initialize."""
-        self.data_schema = CONFIG_SCHEMA_A
 
     async def async_step_user(self, user_input=None):
         """Handle a flow initialized by the user."""
         # if self._async_current_entries():
         #    return self.async_abort(reason="single_instance_allowed")
+        self.data_schema = CONFIG_SCHEMA_A
         if not user_input:
             return self._show_form()
 
@@ -54,13 +46,12 @@ class SonnenbatterieFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             def _internal_setup(_username, _password, _ipaddress):
                 return sonnenbatterie(_username, _password, _ipaddress)
 
-            def _internal_setup_v2(_apitoken, _ipaddress):
-                return sonnenbatterie(_apitoken, _ipaddress) #API V2
-
+            def _internal_setup_v2(_username, _apitoken, _ipaddress):
+                return sonnenbatterie(_username, _apitoken, _ipaddress) #API V2
 
             if api_token is not None:
                 sonnenInst = await self.hass.async_add_executor_job(
-                    _internal_setup_v2, api_token, ip_address
+                    _internal_setup_v2, username, api_token, ip_address
                 )
             else:
                 sonnenInst = await self.hass.async_add_executor_job(
@@ -69,11 +60,10 @@ class SonnenbatterieFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
         except Exception:
             e = traceback.format_exc()
-        #    LOGGER.error("Unable to connect to sonnenbatterie: %s", e)
-            LOGGER.error(f'Unable to connect to sonnenbatterie: {e}')
+            LOGGER.error("Unable to connect to sonnenbatterie: %s", e)
             # if ex.errcode == 400:
             #    return self._show_form({"base": "invalid_credentials"})
-            return self._show_form({"base": "connection_error"})
+            return self._show_form(errors={"base": "connection_error"})
 
         if hasattr(sonnenInst, 'batterie'):
             return self.async_create_entry(
@@ -107,6 +97,7 @@ class SonnenbatterieFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         """Handle a flow initialized by the user."""
         # if self._async_current_entries():
         #    return self.async_abort(reason="single_instance_allowed")
+        self.data_schema = CONFIG_SCHEMA_B
 
         if not user_input:
             # API_TOKEN = API_WRITE_TOKEN if API_WRITE_TOKEN != "X" else API_READ_TOKEN
@@ -116,19 +107,20 @@ class SonnenbatterieFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             #         "Set BATTERIE_HOST & API_READ_TOKEN or API_WRITE_TOKEN in .env See sonnenbatterie package env.example"
             #     )
             # user_input = {CONF_API_TOKEN:API_TOKEN, CONF_IP_ADDRESS:BATTERIE_HOST}
-
             return self._show_form_B()
 
+        username = user_input[CONF_USERNAME]
         api_token = user_input[CONF_API_TOKEN]
         ip_address = user_input[CONF_IP_ADDRESS]
+        device_id = user_input[CONF_DEVICE_ID]
 
         try:
 
-            def _internal_setup_v2(_apitoken, _ipaddress):
-                return sonnenbatterie(_apitoken, _ipaddress) #API V2
+            def _internal_setup_v2(_username, _apitoken, _ipaddress):
+                return sonnenbatterie(_username, _apitoken, _ipaddress) #API V2
 
             sonnenInst = await self.hass.async_add_executor_job(
-                _internal_setup_v2, api_token, ip_address
+                _internal_setup_v2, username, api_token, ip_address
             )
 
         except Exception:
@@ -137,7 +129,7 @@ class SonnenbatterieFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             LOGGER.error(f'Unable to connect to sonnenbatterie: {e}')
             # if ex.errcode == 400:
             #    return self._show_form({"base": "invalid_credentials"})
-            return self._show_form_B({"base": "connection_error"})
+            return self._show_form_B(errors={"base": "connection_error"})
 
         return self.async_create_entry(
             title=user_input[CONF_IP_ADDRESS],
@@ -145,6 +137,7 @@ class SonnenbatterieFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 CONF_USERNAME: '#api_token',
                 CONF_API_TOKEN: api_token,
                 CONF_IP_ADDRESS: ip_address,
+                CONF_DEVICE_ID: device_id,
             },
         )
 
@@ -183,24 +176,47 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         if user_input is not None:
             return self.async_create_entry(title="", data=user_input)
 
+        OPTIONS_SCHEMA = vol.Schema(
+            {
+                vol.Optional(
+                    CONF_SCAN_INTERVAL,
+                    default=self.config_entry.options.get(
+                        CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL
+                    ),
+                ): cv.positive_int,
+                vol.Optional(
+                    ATTR_SONNEN_DEBUG,
+                    default=self.config_entry.options.get(
+                        ATTR_SONNEN_DEBUG, DEFAULT_SONNEN_DEBUG
+                    ),
+                ): bool,
+            }
+        )
+
+        OPTIONS_SCHEMA_B = vol.Schema(
+            {
+                vol.Required(CONF_DEVICE_ID,
+                    default=self.config_entry.options.get(
+                        CONF_DEVICE_ID, "")
+                    ): str,
+                vol.Required(CONF_MODEL,
+                    default=self.config_entry.options.get(
+                        CONF_MODEL, "Sonnen ??")
+                    ): str,
+            }
+        )
+
+        if self.options[CONF_USERNAME] == '#api_token':
+            data_schema = self.add_suggested_values_to_schema(
+                OPTIONS_SCHEMA_B, OPTIONS_SCHEMA
+            )
+        else:
+            data_schema = OPTIONS_SCHEMA
+
+
         return self.async_show_form(
             step_id="init",
-            data_schema=vol.Schema(
-                {
-                    vol.Optional(
-                        CONF_SCAN_INTERVAL,
-                        default=self.config_entry.options.get(
-                            CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL
-                        ),
-                    ): cv.positive_int,
-                    vol.Optional(
-                        ATTR_SONNEN_DEBUG,
-                        default=self.config_entry.options.get(
-                            ATTR_SONNEN_DEBUG, DEFAULT_SONNEN_DEBUG
-                        ),
-                    ): bool,
-                }
-            ),
+            data_schema=data_schema,
         )
 
     async def _update_options(self):
