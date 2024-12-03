@@ -45,21 +45,27 @@ class SonnenbatterieFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             return self._show_form()
 
         username = user_input[CONF_USERNAME]
-        password = user_input[CONF_PASSWORD]
-        ipaddress = user_input[CONF_IP_ADDRESS]
+        password = user_input[CONF_PASSWORD] if CONF_PASSWORD in user_input else None
+        api_token = user_input[CONF_API_TOKEN] if CONF_API_TOKEN in user_input else None
+        ip_address = user_input[CONF_IP_ADDRESS]
 
         try:
 
             def _internal_setup(_username, _password, _ipaddress):
                 return sonnenbatterie(_username, _password, _ipaddress)
 
-            sonnen_inst = await self.hass.async_add_executor_job(
-                _internal_setup, username, password, ipaddress
-            )
-            # sonnenbatterie(username,password,ipaddress)
-            # await self.hass.async_add_executor_job(
-            #    Abode, username, password, True, True, True, cache
-            # )
+            def _internal_setup_v2(_apitoken, _ipaddress):
+                return sonnenbatterie(_apitoken, _ipaddress) #API V2
+
+
+            if api_token is not None:
+                sonnenInst = await self.hass.async_add_executor_job(
+                    _internal_setup_v2, api_token, ip_address
+                )
+            else:
+                sonnenInst = await self.hass.async_add_executor_job(
+                    _internal_setup, username, password, ip_address
+                )
 
         except Exception:
             e = traceback.format_exc()
@@ -69,14 +75,24 @@ class SonnenbatterieFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             #    return self._show_form({"base": "invalid_credentials"})
             return self._show_form({"base": "connection_error"})
 
-        return self.async_create_entry(
-            title=user_input[CONF_IP_ADDRESS],
-            data={
-                CONF_USERNAME: username,
-                CONF_PASSWORD: password,
-                CONF_IP_ADDRESS: ipaddress,
-            },
-        )
+        if hasattr(sonnenInst, 'batterie'):
+            return self.async_create_entry(
+                title=user_input[CONF_IP_ADDRESS] + ' (api token)',
+                data={
+                    CONF_USERNAME: '#api_token',
+                    CONF_API_TOKEN: api_token,
+                    CONF_IP_ADDRESS: ip_address,
+                },
+            )
+        else:
+            return self.async_create_entry(
+                title=user_input[CONF_IP_ADDRESS] + ' (usr/pwd)',
+                data={
+                    CONF_USERNAME: username,
+                    CONF_PASSWORD: password,
+                    CONF_IP_ADDRESS: ip_address,
+                },
+            )
 
     @callback
     def _show_form(self, errors=None):
@@ -103,16 +119,16 @@ class SonnenbatterieFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
             return self._show_form_B()
 
-        apitoken = user_input[CONF_API_TOKEN]
-        ipaddress = user_input[CONF_IP_ADDRESS]
+        api_token = user_input[CONF_API_TOKEN]
+        ip_address = user_input[CONF_IP_ADDRESS]
 
         try:
 
-            def _internal_setup(_apitoken, _ipaddress):
+            def _internal_setup_v2(_apitoken, _ipaddress):
                 return sonnenbatterie(_apitoken, _ipaddress) #API V2
 
-            sonnen_inst = await self.hass.async_add_executor_job(
-                _internal_setup, apitoken, ipaddress
+            sonnenInst = await self.hass.async_add_executor_job(
+                _internal_setup_v2, api_token, ip_address
             )
 
         except Exception:
@@ -126,8 +142,9 @@ class SonnenbatterieFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_create_entry(
             title=user_input[CONF_IP_ADDRESS],
             data={
-                CONF_API_TOKEN: apitoken,
-                CONF_IP_ADDRESS: ipaddress,
+                CONF_USERNAME: '#api_token',
+                CONF_API_TOKEN: api_token,
+                CONF_IP_ADDRESS: ip_address,
             },
         )
 

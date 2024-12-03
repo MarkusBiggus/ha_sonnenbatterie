@@ -14,6 +14,7 @@ from .const import (
     CONF_USERNAME,
     CONF_IP_ADDRESS,
     CONF_SCAN_INTERVAL,
+    CONF_API_TOKEN,
     ATTR_SONNEN_DEBUG,
     DOMAIN,
     LOGGER,
@@ -40,7 +41,10 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     LOGGER.info("SETUP_ENTRY")
     # await async_setup_reload_service(hass, DOMAIN, PLATFORMS)
     username = config_entry.data.get(CONF_USERNAME)
-    password = config_entry.data.get(CONF_PASSWORD)
+    password = config_entry.data.get(CONF_PASSWORD, None)
+#    password = user_input[CONF_PASSWORD] if CONF_PASSWORD in user_input else None
+#    apitoken = user_input[CONF_API_TOKEN] if CONF_API_TOKEN in user_input else None
+    api_token = config_entry.data.get(CONF_API_TOKEN, None)
     ip_address = config_entry.data.get(CONF_IP_ADDRESS)
     update_interval_seconds = config_entry.options.get(CONF_SCAN_INTERVAL)
     debug_mode = config_entry.options.get(ATTR_SONNEN_DEBUG)
@@ -48,9 +52,17 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     def _internal_setup(_username, _password, _ip_address):
         return sonnenbatterie(_username, _password, _ip_address)
 
-    sonnenInst = await hass.async_add_executor_job(
-        _internal_setup, username, password, ip_address
-    )
+    def _internal_setup_v2(_apitoken, _ipaddress):
+        return sonnenbatterie(_apitoken, _ipaddress) #API V2
+
+    if api_token is not None:
+        sonnenInst = await hass.async_add_executor_job(
+            _internal_setup_v2, api_token, ip_address
+        )
+    else:
+        sonnenInst = await hass.async_add_executor_job(
+            _internal_setup, username, password, ip_address
+        )
     update_interval_seconds = update_interval_seconds or 1
     LOGGER.info("{0} - UPDATEINTERVAL: {1}".format(DOMAIN, update_interval_seconds))
 
