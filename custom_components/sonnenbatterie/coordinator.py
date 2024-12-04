@@ -1,4 +1,4 @@
-"""The data update coordinator for OctoPrint."""
+"""The data update coordinator for SonnenBatterie."""
 
 import traceback
 

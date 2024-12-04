@@ -1,4 +1,4 @@
-"""The Sonnenbatterie integration."""
+"""The SonnenBatterie integration."""
 
 from .const import *
 import json

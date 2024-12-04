@@ -5,16 +5,13 @@ from sonnenbatterie import sonnenbatterie
 import traceback
 
 # import logging
-# import voluptuous as vol
+import voluptuous as vol
 from homeassistant import config_entries, core
 from homeassistant.core import callback
 from homeassistant.helpers import config_validation as cv
 
-# pylint: disable=unused-wildcard-import
-from .const import *  #
+from .const import *
 
-# pylint: enable=unused-wildcard-import
-import voluptuous as vol
 from homeassistant.const import (
     CONF_PASSWORD,
     CONF_USERNAME,
@@ -22,6 +19,7 @@ from homeassistant.const import (
     CONF_SCAN_INTERVAL,
     CONF_API_TOKEN,
     CONF_DEVICE_ID,
+    CONF_MODEL
 )
 
 class SonnenbatterieFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
