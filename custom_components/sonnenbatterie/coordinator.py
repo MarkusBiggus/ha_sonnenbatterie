@@ -83,9 +83,9 @@ class SonnenBatterieCoordinator(DataUpdateCoordinator):
             self.latestData["status"] = await self.hass.async_add_executor_job(
                 self.sbInst.get_status
             )
-            self.latestData["battery_info"] = await self.hass.async_add_executor_job(
-                self.sbInst.get_battery
-            )
+            # self.latestData["battery_info"] = await self.hass.async_add_executor_job(
+            #     self.sbInst.get_battery
+            # )
             self.latestData["battery_system"] = await self.hass.async_add_executor_job(
                 self.sbInst.get_batterysystem
             )
@@ -136,15 +136,7 @@ class SonnenBatterieCoordinator(DataUpdateCoordinator):
         )
         batt_module_count = int(self.latestData["battery_system"]["modules"])
 
-        if self.latestData["status"]["BatteryCharging"]:
-            battery_current_state = "charging"
-        elif self.latestData["status"]["BatteryDischarging"]:
-            battery_current_state = "discharging"
-        else:
-            battery_current_state = "standby"
-
         self.latestData["battery_info"] = {}
-        self.latestData["battery_info"]["current_state"] = battery_current_state
         self.latestData["battery_info"][
             "total_installed_capacity"
         ] = total_installed_capacity = int(batt_module_count * batt_module_capacity)
@@ -157,6 +149,19 @@ class SonnenBatterieCoordinator(DataUpdateCoordinator):
         self.latestData["battery_info"]["remaining_capacity_usable"] = max(
             0, int(remaining_capacity - reserved_capacity)
         )
+
+        if self.latestData["status"]["BatteryCharging"]:
+            battery_current_state = "charging"
+        elif self.latestData["status"]["BatteryDischarging"]:
+            battery_current_state = "discharging"
+        elif self.latestData["status"]["RSOC"] > 98:
+            battery_current_state = "charged"
+        elif remaining_capacity < 2:
+            battery_current_state = "discharged"
+        else:
+            battery_current_state = "standby"
+
+        self.latestData["battery_info"]["current_state"] = battery_current_state
 
     def send_all_data_to_log(self):
         """
