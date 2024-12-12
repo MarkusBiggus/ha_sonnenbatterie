@@ -3,12 +3,12 @@
 from unittest.mock import patch
 
 # from sonnen_api_v2 import RealTimeAPI
-from sonnen_api_v2 import BatterieError
+from sonnen_api_v2 import Batterie, BatterieError
 #from sonnen.inverters import X1MiniV34
 import sonnenbatterie
-from mock_sonnenbatterie import __mock_status_charging, __mock_configurations, __mock_battery, __mock_powermeter, __mock_inverter
+from . mock_sonnenbatterie_v2_charging import __mock_status_charging, __mock_latest_charging, __mock_configurations, __mock_battery, __mock_powermeter, __mock_inverter
 from homeassistant import config_entries
-from custom_components.sonnenbatterie.const import DOMAIN
+from config.custom_components.sonnenbatterie.const import DOMAIN
 from homeassistant.const import CONF_IP_ADDRESS, CONF_PASSWORD, CONF_PORT, CONF_USERNAME, CONF_API_TOKEN
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
@@ -62,12 +62,13 @@ async def test_form_success(hass: HomeAssistant) -> None:
             "homeassistant.custom_components.sonnenbatterie.config_flow.async_step_user",
             return_value=__mock_async_step_user_success(),
         ),
-        patch("sonnen_api_v2.get_status", return_value=__mock_status_charging()),
-        patch("sonnen_api_v2.get_battery", return_value=__mock_battery()),
-        patch("sonnen_api_v2.get_inverter", return_value=__mock_inverter()),
-        patch("sonnen_api_v2.get_powermeter", return_value=__mock_powermeter()),
-        patch("sonnen_api_v2.get_systemdata", return_value=__mock_status_charging()),
-        patch("sonnen_api_v2.get_configurations", return_value=__mock_configurations()),
+        # patch("Batterie.fetch_status", return_value=__mock_status_charging()),
+        # patch("Batterie.fetch_latest_details", return_value=__mock_latest_charging()),
+        patch("Batterie.fetch_configurations", return_value=__mock_configurations()),
+        # patch("Batterie.fetch_battery_status", return_value=__mock_battery()),
+        # patch("Batterie.fetch_powermeter", return_value=__mock_powermeter()),
+        # patch("Batterie.fetch_inverter", return_value=__mock_inverter()),
+
         # patch("sonnenbatterie.get_status", return_value=__mock_status_charging()),
         # patch("sonnenbatterie.get_battery", return_value=__mock_battery()),
         # patch("sonnenbatterie.get_inverter", return_value=__mock_inverter()),
