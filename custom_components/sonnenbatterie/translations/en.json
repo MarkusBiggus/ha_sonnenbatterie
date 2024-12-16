@@ -21,13 +21,20 @@
             },
             "token": {
                 "data": {
+                    "model_id": "Model ID",
+                    "device_id": "Serial Number",
                     "token": "API Token",
                     "ip_address": "IP-Address",
                     "ip_port": "IP-Port",
                     "scan_interval": "Update interval (seconds)"
                 },
+                "data_description": {
+                    "model_id": "From portal System page. Used to make component instance name",
+                    "device_id": "Serial number is found on sonnenbatterie portal dashboard",
+                    "token": "From portal Software-Interation page. Enable API and generate a Read token using sonnenbatterie"
+                },
                 "title": "Enter your Sonnenbatterie API information",
-                "description": "Enable API and generate a token in the sonnenbatterie admin portal."
+                "description": "Model, Serial number and API token from sonnenbatterie portal."
             }
         }
     },
@@ -49,6 +56,7 @@
                     "standby": "Standby",
                     "charging": "Charging",
                     "discharging": "Discharging",
+                    "dischargingReserve": "Discharging Reserve",
                     "charged": "Charged",
                     "discharged" : "Discharged"
                 }

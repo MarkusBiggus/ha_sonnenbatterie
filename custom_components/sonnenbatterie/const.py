@@ -6,6 +6,9 @@ from homeassistant.const import (
     CONF_USERNAME,
     CONF_IP_ADDRESS,
     CONF_API_TOKEN,
+    CONF_PORT,
+    CONF_MODEL,
+    CONF_DEVICE_ID,
 )
 
 LOGGER = logging.getLogger(__package__)
@@ -23,9 +26,12 @@ CONFIG_SCHEMA_A = vol.Schema(
 
 CONFIG_SCHEMA_B = vol.Schema(
     {
-        vol.Optional(CONF_USERNAME, default='api_token'): str,
+#        vol.Optional(CONF_USERNAME, default='*api_token*'): str,
+        vol.Required(CONF_MODEL): str,
+        vol.Required(CONF_DEVICE_ID): str,
         vol.Required(CONF_API_TOKEN): str,
         vol.Required(CONF_IP_ADDRESS): str,
+        vol.Required(CONF_PORT): str,
     }
 )
 

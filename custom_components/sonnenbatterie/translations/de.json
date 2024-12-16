@@ -21,12 +21,19 @@
             },
             "token": {
                 "data": {
-                    "token": "API Token",
+                    "model_id": "Model-ID",
+                    "device_id": "Seriennummer",
+                    "token": "API-Token",
                     "ip_address": "IP-Adresse",
                     "scan_interval": "Aktualisierungsinterval (Sekunden)"
                 },
+                "data_description": {
+                    "model_id": "Wird verwendet, um den Namen der Komponenteninstanz zu erstellen",
+                    "token": "Aktivieren Sie die API und generieren Sie ein Lese-Token über das Sonnenbatterie-Admin-Portal",
+                    "device_id": "Die Seriennummer finden Sie im Sonnenbatterie-Admin-Portal"
+                },
                 "title": "Gib deine Sonnenbatterie API informationen ein",
-                "description": "API aktivieren und Token im sonnenbatterie Admin-Portal generieren."
+                "description": "Modell, Seriennummer und API-Token finden Sie im Sonnenbatterie-Admin-Portal."
             }
         }
     },
@@ -48,6 +55,7 @@
                     "standby": "Standby",
                     "charging": "Lädt",
                     "discharging": "Entlädt",
+                    "dischargingReserve": "Entläden Reserve",
                     "charged": "Aufgeladen",
                     "discharged" : "Abgefeuert"
                 }

@@ -110,15 +110,17 @@ class SonnenbatterieFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         username = user_input[CONF_USERNAME]
         api_token = user_input[CONF_API_TOKEN]
         ip_address = user_input[CONF_IP_ADDRESS]
+        model_id = user_input[CONF_MODEL]
         device_id = user_input[CONF_DEVICE_ID]
+        ip_port = user_input[CONF_PORT]
 
         try:
 
-            def _internal_setup_v2(_username, _apitoken, _ipaddress):
-                return sonnenbatterie(_username, _apitoken, _ipaddress) #API V2
+            def _internal_setup_v2(_username, _apitoken, _ipaddress, _ipport):
+                return sonnenbatterie(_username, _apitoken, _ipaddress, _ipport) #API V2
 
             sonnenInst = await self.hass.async_add_executor_job(
-                _internal_setup_v2, username, api_token, ip_address
+                _internal_setup_v2, username, api_token, ip_address, ip_port
             )
 
         except Exception:
@@ -135,6 +137,8 @@ class SonnenbatterieFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 CONF_USERNAME: '#api_token',
                 CONF_API_TOKEN: api_token,
                 CONF_IP_ADDRESS: ip_address,
+                CONF_PORT: ip_port,
+                CONF_MODEL: model_id,
                 CONF_DEVICE_ID: device_id,
             },
         )
@@ -191,22 +195,9 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
             }
         )
 
-        OPTIONS_SCHEMA_B = vol.Schema(
-            {
-                vol.Required(CONF_DEVICE_ID,
-                    default=self.config_entry.options.get(
-                        CONF_DEVICE_ID, "")
-                    ): str,
-                vol.Required(CONF_MODEL,
-                    default=self.config_entry.options.get(
-                        CONF_MODEL, "Sonnen ??")
-                    ): str,
-            }
-        )
-
         if self.options[CONF_USERNAME] == '#api_token':
             data_schema = self.add_suggested_values_to_schema(
-                OPTIONS_SCHEMA_B, OPTIONS_SCHEMA
+                OPTIONS_SCHEMA, OPTIONS_SCHEMA
             )
         else:
             data_schema = OPTIONS_SCHEMA
