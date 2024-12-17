@@ -1,6 +1,7 @@
 """sonnenbatterie sensor platform."""
 
 from collections.abc import Callable
+from datetime import timedelta
 from homeassistant.helpers.update_coordinator import (
     CoordinatorEntity,
     DataUpdateCoordinator,
@@ -38,6 +39,7 @@ from .sensor_list import (
 
 _LOGGER = logging.getLogger(__name__)
 
+SCAN_INTERVAL = timedelta(seconds=10)
 
 async def async_unload_entry(hass, entry):
     """Unload a config entry."""
@@ -54,7 +56,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     api_token = config_entry.data.get(CONF_API_TOKEN, None)
     ip_address = config_entry.data.get(CONF_IP_ADDRESS)
     ip_port = config_entry.data.get(CONF_PORT, '80')
-    update_interval_seconds = config_entry.options.get(CONF_SCAN_INTERVAL, 15)
+    update_interval_seconds = config_entry.options.get(CONF_SCAN_INTERVAL, 10)
     debug_mode = config_entry.options.get(ATTR_SONNEN_DEBUG)
 
     def _internal_setup(_username, _password, _ip_address):
@@ -71,7 +73,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         sonnenInst = await hass.async_add_executor_job(
             _internal_setup, username, password, ip_address
         )
-    update_interval_seconds = update_interval_seconds or 1
+    update_interval_seconds = update_interval_seconds or 10
     LOGGER.info("{0} - UPDATEINTERVAL: {1}".format(DOMAIN, update_interval_seconds))
 
     """ The Coordinator is called from HA for updates from API """
