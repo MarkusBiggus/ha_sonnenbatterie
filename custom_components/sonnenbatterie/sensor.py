@@ -1,3 +1,6 @@
+"""sonnenbatterie sensor platform."""
+
+from collections.abc import Callable
 from homeassistant.helpers.update_coordinator import (
     CoordinatorEntity,
     DataUpdateCoordinator,
@@ -5,21 +8,27 @@ from homeassistant.helpers.update_coordinator import (
 from homeassistant.components.sensor import (
     SensorEntity,
 )
-from homeassistant.helpers.typing import StateType
+from homeassistant.helpers.typing import (
+    StateType,
+    ConfigType,
+    DiscoveryInfoType,
+)
 from homeassistant.core import callback
-
+from homeassistant import config_entries, core
 from .coordinator import SonnenBatterieCoordinator
 from sonnenbatterie import sonnenbatterie
 from .const import (
     CONF_PASSWORD,
     CONF_USERNAME,
     CONF_IP_ADDRESS,
+    CONF_PORT,
     CONF_SCAN_INTERVAL,
     CONF_API_TOKEN,
     ATTR_SONNEN_DEBUG,
     DOMAIN,
     LOGGER,
     logging,
+    PLATFORM_SCHEMA,
 )
 from .sensor_list import (
     SonnenbatterieSensorEntityDescription,
@@ -42,22 +51,21 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     # await async_setup_reload_service(hass, DOMAIN, PLATFORMS)
     username = config_entry.data.get(CONF_USERNAME)
     password = config_entry.data.get(CONF_PASSWORD, None)
-#    password = user_input[CONF_PASSWORD] if CONF_PASSWORD in user_input else None
-#    apitoken = user_input[CONF_API_TOKEN] if CONF_API_TOKEN in user_input else None
     api_token = config_entry.data.get(CONF_API_TOKEN, None)
     ip_address = config_entry.data.get(CONF_IP_ADDRESS)
-    update_interval_seconds = config_entry.options.get(CONF_SCAN_INTERVAL)
+    ip_port = config_entry.data.get(CONF_PORT, '80')
+    update_interval_seconds = config_entry.options.get(CONF_SCAN_INTERVAL, 15)
     debug_mode = config_entry.options.get(ATTR_SONNEN_DEBUG)
 
     def _internal_setup(_username, _password, _ip_address):
         return sonnenbatterie(_username, _password, _ip_address)
 
-    def _internal_setup_v2(_apitoken, _ipaddress):
-        return sonnenbatterie(_apitoken, _ipaddress) #API V2
+    def _internal_setup_v2(_apitoken, _ipaddress, _ipport):
+        return sonnenbatterie(_apitoken, _ipaddress, _ipport) #API V2
 
     if api_token is not None:
         sonnenInst = await hass.async_add_executor_job(
-            _internal_setup_v2, api_token, ip_address
+            _internal_setup_v2, api_token, ip_address, ip_port
         )
     else:
         sonnenInst = await hass.async_add_executor_job(
@@ -92,6 +100,15 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     LOGGER.info("Init done")
     return True
 
+async def async_setup_platform(
+    hass: core.HomeAssistant,
+    config: ConfigType,
+    async_add_entities: Callable,
+    discovery_info: DiscoveryInfoType | None = None,
+) -> None:
+    """Set up the sensor platform."""
+    sensors = [SonnenbatterieSensor(entity) for entity in SENSORS]
+    async_add_entities(sensors, update_before_add=True)
 
 class SonnenbatterieSensor(CoordinatorEntity[SonnenBatterieCoordinator], SensorEntity):
     """Represent an SonnenBatterie sensor."""
@@ -134,3 +151,13 @@ class SonnenbatterieSensor(CoordinatorEntity[SonnenBatterieCoordinator], SensorE
     def native_value(self) -> StateType:
         """Return the state of the sensor."""
         return self.entity_description.value_fn(self.coordinator)
+
+    # async def async_update(self) -> None:
+    #     """Update all sensors."""
+    #     try:
+    #         self.coordinator.sbInst.get_update()
+    #     except (sonnenbatterie.BatterieError):
+    #         self._available = False
+    #         _LOGGER.exception(
+    #             "Error retrieving data from Sonnen for sensor %s", self.name
+    #         )

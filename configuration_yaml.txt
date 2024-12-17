@@ -1,0 +1,6 @@
+# Example configuration.yaml entry
+sensor:
+  - platform: sonnenbatterie
+    access_token: !secret sonnenbatterie_api_token
+    model: "Power unit Evo IP56"
+    device_id: "654321"

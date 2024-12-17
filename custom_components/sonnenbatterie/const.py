@@ -1,6 +1,6 @@
 import logging
 import voluptuous as vol
-
+import homeassistant.helpers.config_validation as cv
 from homeassistant.const import (
     CONF_PASSWORD,
     CONF_USERNAME,
@@ -10,6 +10,7 @@ from homeassistant.const import (
     CONF_MODEL,
     CONF_DEVICE_ID,
 )
+from homeassistant.components.sensor import PLATFORM_SCHEMA
 
 LOGGER = logging.getLogger(__package__)
 
@@ -19,19 +20,28 @@ DEFAULT_SCAN_INTERVAL = 10
 CONFIG_SCHEMA_A = vol.Schema(
     {
         vol.Required(CONF_USERNAME): vol.In(["User", "Installer"]),
-        vol.Required(CONF_PASSWORD): str,
-        vol.Required(CONF_IP_ADDRESS): str,
+        vol.Required(CONF_PASSWORD): cv.string,
+        vol.Required(CONF_IP_ADDRESS): cv.string,
     }
 )
 
 CONFIG_SCHEMA_B = vol.Schema(
     {
 #        vol.Optional(CONF_USERNAME, default='*api_token*'): str,
-        vol.Required(CONF_MODEL): str,
-        vol.Required(CONF_DEVICE_ID): str,
-        vol.Required(CONF_API_TOKEN): str,
-        vol.Required(CONF_IP_ADDRESS): str,
-        vol.Required(CONF_PORT): str,
+        vol.Required(CONF_MODEL): cv.string,
+        vol.Required(CONF_DEVICE_ID): cv.string,
+        vol.Required(CONF_API_TOKEN): cv.string,
+        vol.Required(CONF_IP_ADDRESS): cv.string,
+        vol.Required(CONF_PORT): cv.string,
+    }
+)
+PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
+    {
+    vol.Required(CONF_MODEL): cv.string,
+    vol.Required(CONF_DEVICE_ID): cv.string,
+    vol.Required(CONF_API_TOKEN): cv.string,
+    vol.Required(CONF_IP_ADDRESS): cv.string,
+    vol.Required(CONF_PORT): cv.string,
     }
 )
 

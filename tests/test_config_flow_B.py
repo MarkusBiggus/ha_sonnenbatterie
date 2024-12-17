@@ -12,7 +12,7 @@ import sonnenbatterie
 from . mock_sonnenbatterie_v2_charging import __mock_configurations #, __mock_status_charging, __mock_latest_charging, __mock_battery, __mock_powermeter, __mock_inverter
 from homeassistant import config_entries
 
-from homeassistant.config.custom_components.sonnenbatterie.const import DOMAIN
+from config.custom_components.sonnenbatterie.const import DOMAIN
 from homeassistant.const import CONF_IP_ADDRESS, CONF_PORT, CONF_USERNAME, CONF_API_TOKEN, CONF_MODEL, CONF_DEVICE_ID
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
