@@ -9,16 +9,6 @@
             "invalid_credentials": "Invalid login/token"
         },
         "step": {
-            "user": {
-                "data": {
-                    "password": "Password",
-                    "username": "User",
-                    "ip_address": "IP-Address",
-                    "scan_interval": "Update interval (seconds)"
-                },
-                "title": "Enter your Sonnenbatterie-login information",
-                "description": "Normally you find your password on the side of your sonnenbatterie near the main switch."
-            },
             "token": {
                 "data": {
                     "model_id": "Model ID",
@@ -33,8 +23,27 @@
                     "device_id": "Serial number is found on sonnenbatterie portal dashboard",
                     "token": "From portal Software-Interation page. Enable API and generate a Read token using sonnenbatterie"
                 },
+                "sections": {
+                    "options": {
+                        "data": {
+                            "use_token": true,
+                            "enable_debug": false
+                        },
+                        "mdi": "lock"
+                    }
+                },
                 "title": "Enter your Sonnenbatterie API information",
                 "description": "Model, Serial number and API token from sonnenbatterie portal."
+            },
+            "user": {
+                "data": {
+                    "password": "Password",
+                    "username": "User",
+                    "ip_address": "IP-Address",
+                    "scan_interval": "Update interval (seconds)"
+                },
+                "title": "Enter your Sonnenbatterie-login information",
+                "description": "Normally you find your password on the side of your sonnenbatterie near the main switch."
             }
         }
     },

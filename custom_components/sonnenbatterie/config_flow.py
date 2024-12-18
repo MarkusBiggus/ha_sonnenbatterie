@@ -26,72 +26,72 @@ class SonnenbatterieFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     def __init__(self):
         """Initialize."""
 
+    # async def async_step_user(self, user_input=None):
+    #     """Handle a flow initialized by the user."""
+    #     # if self._async_current_entries():
+    #     #    return self.async_abort(reason="single_instance_allowed")
+    #     self.data_schema = CONFIG_SCHEMA_A
+    #     if not user_input:
+    #         return self._show_form()
+
+    #     username = user_input[CONF_USERNAME]
+    #     password = user_input[CONF_PASSWORD] if CONF_PASSWORD in user_input else None
+    #     api_token = user_input[CONF_API_TOKEN] if CONF_API_TOKEN in user_input else None
+    #     ip_address = user_input[CONF_IP_ADDRESS]
+
+    #     try:
+
+    #         def _internal_setup(_username, _password, _ipaddress):
+    #             return sonnenbatterie(_username, _password, _ipaddress)
+
+    #         def _internal_setup_v2(_username, _apitoken, _ipaddress):
+    #             return sonnenbatterie(_username, _apitoken, _ipaddress) #API V2
+
+    #         if api_token is not None:
+    #             sonnenInst = await self.hass.async_add_executor_job(
+    #                 _internal_setup_v2, username, api_token, ip_address
+    #             )
+    #         else:
+    #             sonnenInst = await self.hass.async_add_executor_job(
+    #                 _internal_setup, username, password, ip_address
+    #             )
+
+    #     except Exception:
+    #         e = traceback.format_exc()
+    #         LOGGER.error("Unable to connect to sonnenbatterie: %s", e)
+    #         # if ex.errcode == 400:
+    #         #    return self._show_form({"base": "invalid_credentials"})
+    #         return self._show_form(errors={"base": "connection_error"})
+
+    #     if hasattr(sonnenInst, 'batterie'):
+    #         return self.async_create_entry(
+    #             title=user_input[CONF_IP_ADDRESS] + ' (api token)',
+    #             data={
+    #                 CONF_USERNAME: '#api_token',
+    #                 CONF_API_TOKEN: api_token,
+    #                 CONF_IP_ADDRESS: ip_address,
+    #             },
+    #         )
+    #     else:
+    #         return self.async_create_entry(
+    #             title=user_input[CONF_IP_ADDRESS] + ' (usr/pwd)',
+    #             data={
+    #                 CONF_USERNAME: username,
+    #                 CONF_PASSWORD: password,
+    #                 CONF_IP_ADDRESS: ip_address,
+    #             },
+    #         )
+
+    # @callback
+    # def _show_form(self, errors=None):
+    #     """Show the form to the user."""
+    #     return self.async_show_form(
+    #         step_id="user",
+    #         data_schema=self.data_schema,
+    #         errors=errors if errors else {},
+    #     )
+
     async def async_step_user(self, user_input=None):
-        """Handle a flow initialized by the user."""
-        # if self._async_current_entries():
-        #    return self.async_abort(reason="single_instance_allowed")
-        self.data_schema = CONFIG_SCHEMA_A
-        if not user_input:
-            return self._show_form()
-
-        username = user_input[CONF_USERNAME]
-        password = user_input[CONF_PASSWORD] if CONF_PASSWORD in user_input else None
-        api_token = user_input[CONF_API_TOKEN] if CONF_API_TOKEN in user_input else None
-        ip_address = user_input[CONF_IP_ADDRESS]
-
-        try:
-
-            def _internal_setup(_username, _password, _ipaddress):
-                return sonnenbatterie(_username, _password, _ipaddress)
-
-            def _internal_setup_v2(_username, _apitoken, _ipaddress):
-                return sonnenbatterie(_username, _apitoken, _ipaddress) #API V2
-
-            if api_token is not None:
-                sonnenInst = await self.hass.async_add_executor_job(
-                    _internal_setup_v2, username, api_token, ip_address
-                )
-            else:
-                sonnenInst = await self.hass.async_add_executor_job(
-                    _internal_setup, username, password, ip_address
-                )
-
-        except Exception:
-            e = traceback.format_exc()
-            LOGGER.error("Unable to connect to sonnenbatterie: %s", e)
-            # if ex.errcode == 400:
-            #    return self._show_form({"base": "invalid_credentials"})
-            return self._show_form(errors={"base": "connection_error"})
-
-        if hasattr(sonnenInst, 'batterie'):
-            return self.async_create_entry(
-                title=user_input[CONF_IP_ADDRESS] + ' (api token)',
-                data={
-                    CONF_USERNAME: '#api_token',
-                    CONF_API_TOKEN: api_token,
-                    CONF_IP_ADDRESS: ip_address,
-                },
-            )
-        else:
-            return self.async_create_entry(
-                title=user_input[CONF_IP_ADDRESS] + ' (usr/pwd)',
-                data={
-                    CONF_USERNAME: username,
-                    CONF_PASSWORD: password,
-                    CONF_IP_ADDRESS: ip_address,
-                },
-            )
-
-    @callback
-    def _show_form(self, errors=None):
-        """Show the form to the user."""
-        return self.async_show_form(
-            step_id="user",
-            data_schema=self.data_schema,
-            errors=errors if errors else {},
-        )
-
-    async def async_step_token(self, user_input=None):
         """Handle a flow initialized by the user."""
         # if self._async_current_entries():
         #    return self.async_abort(reason="single_instance_allowed")
@@ -107,21 +107,29 @@ class SonnenbatterieFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             # user_input = {CONF_API_TOKEN:API_TOKEN, CONF_IP_ADDRESS:BATTERIE_HOST}
             return self._show_form_B()
 
+        use_token = user_input['use_token']
         username = user_input[CONF_USERNAME]
-        api_token = user_input[CONF_API_TOKEN]
+        password = user_input[CONF_PASSWORD]
         ip_address = user_input[CONF_IP_ADDRESS]
+        ip_port = user_input[CONF_PORT]
+        api_token = user_input[CONF_API_TOKEN]
         model_id = user_input[CONF_MODEL]
         device_id = user_input[CONF_DEVICE_ID]
-        ip_port = user_input[CONF_PORT]
 
+        def _internal_setup(_username, _password, _ipaddress):
+            return sonnenbatterie(_username, _password, _ipaddress)
+
+        def _internal_setup_v2(_username, _apitoken, _ipaddress, _ipport):
+            return sonnenbatterie(_username, _apitoken, _ipaddress, _ipport) #API V2
         try:
-
-            def _internal_setup_v2(_username, _apitoken, _ipaddress, _ipport):
-                return sonnenbatterie(_username, _apitoken, _ipaddress, _ipport) #API V2
-
-            sonnenInst = await self.hass.async_add_executor_job(
+            if use_token is True:
+                sonnenInst = await self.hass.async_add_executor_job(
                 _internal_setup_v2, username, api_token, ip_address, ip_port
-            )
+                )
+            else:
+                sonnenInst = await self.hass.async_add_executor_job(
+                    _internal_setup, username, password, ip_address
+                )
 
         except Exception:
             e = traceback.format_exc()
@@ -132,12 +140,14 @@ class SonnenbatterieFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             return self._show_form_B(errors={"base": "connection_error"})
 
         return self.async_create_entry(
-            title=user_input[CONF_IP_ADDRESS],
+            title=user_input[CONF_IP_ADDRESS] + ' (api token)',
             data={
                 CONF_USERNAME: '#api_token',
-                CONF_API_TOKEN: api_token,
                 CONF_IP_ADDRESS: ip_address,
                 CONF_PORT: ip_port,
+                'use_token': 'True',
+                CONF_PASSWORD: '',
+                CONF_API_TOKEN: api_token,
                 CONF_MODEL: model_id,
                 CONF_DEVICE_ID: device_id,
             },

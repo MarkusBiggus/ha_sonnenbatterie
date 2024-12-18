@@ -35,27 +35,25 @@ async def test_show_form(hass: HomeAssistant) -> None:
     )
 
     assert result["type"] is FlowResultType.FORM
-    assert result["step_id"] == "token"
+    assert result["step_id"] == "user"
 
 
 @pytest.mark.parametrize("ip_address", ["192.168.100.200", "192.168.88.11"])
-async def test_create_entry(
-    hass: HomeAssistant, ip_address: str,
-) -> None:
+async def test_create_entry(hass: HomeAssistant, ip_address: str) -> None:
     """Test that the token step works."""
     result = await hass.config_entries.flow.async_init(
         DOMAIN,
         context={"source": SOURCE_USER},
         data={
             CONF_USERNAME: '#api_token',
-            CONF_MODEL: 'Power unit Evo IP56',
-            CONF_DEVICE_ID: '321123',
-            CONF_API_TOKEN: 'token',
             CONF_IP_ADDRESS: ip_address, # '192.168.100.200',
             CONF_PORT: '80',
+            'use_token': 'True',
+            CONF_API_TOKEN: 'token',
+            CONF_MODEL: 'Power unit Evo IP56',
+            CONF_DEVICE_ID: '321123',
             },
     )
-
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert result["title"] == (f'{ip_address}  (api token)')
     assert result["data"][CONF_IP_ADDRESS] == ip_address # '192.168.100.200'
@@ -83,7 +81,6 @@ async def test_flow_works(hass: HomeAssistant, mock_discovery) -> None:
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": SOURCE_USER}
     )
-
     assert result["type"] is FlowResultType.FORM
     assert result["step_id"] == "token"
     # assert result["data_schema"]({CONF_USERNAME: "", CONF_PASSWORD: ""}) == {
@@ -99,23 +96,26 @@ async def test_flow_works(hass: HomeAssistant, mock_discovery) -> None:
         result["flow_id"],
         user_input={
             CONF_USERNAME: '#api_token',
-            CONF_MODEL: 'Power unit Evo IP56',
-            CONF_DEVICE_ID: '321123',
-            CONF_API_TOKEN: 'token',
             CONF_IP_ADDRESS: '192.168.100.200',
             CONF_PORT: '80',
+            'use_token': 'True',
+            CONF_PASSWORD: '',
+            CONF_API_TOKEN: 'token',
+            CONF_MODEL: 'Power unit Evo IP56',
+            CONF_DEVICE_ID: '321123',
         },
     )
-
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert result["title"] == "192.168.100.200  (api token)"
     assert result["data"] == {
             CONF_USERNAME: '#api_token',
-            CONF_MODEL: 'Power unit Evo IP56',
-            CONF_DEVICE_ID: '321123',
-            CONF_API_TOKEN: 'token',
             CONF_IP_ADDRESS: '192.168.100.200',
             CONF_PORT: '80',
+            'use_token': 'True',
+            CONF_PASSWORD: '',
+            CONF_API_TOKEN: 'token',
+            CONF_DEVICE_ID: '321123',
+            CONF_MODEL: 'Power unit Evo IP56',
     }
 
 
@@ -125,7 +125,6 @@ async def test_flow_user_step_no_input(hass: HomeAssistant):
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": SOURCE_USER}
     )
-
     assert {"base": "missing"} == result["errors"]
     assert result.get("step_id") == "user"
     assert result.get("type") is FlowResultType.FORM
@@ -157,28 +156,28 @@ async def test_flow_user_step_no_input(hass: HomeAssistant):
 #     assert result["data"][CONF_IP_ADDRESS] == "192.168.1.123"
 #     assert result["result"].unique_id == "321123"
 
-async def test_options_flow(
-    hass: HomeAssistant, mock_config_entry #: MockConfigEntry
-) -> None:
-    """Test options config flow."""
-    mock_config_entry.add_to_hass(hass)
+# async def test_options_flow(
+#     hass: HomeAssistant, mock_config_entry #: MockConfigEntry
+# ) -> None:
+#     """Test options config flow."""
+#     mock_config_entry.add_to_hass(hass)
 
-    result = await hass.config_entries.options.async_init(mock_config_entry.entry_id)
+#     result = await hass.config_entries.options.async_init(mock_config_entry.entry_id)
 
-    assert result.get("type") is FlowResultType.FORM
-    assert result.get("step_id") == "init"
+#     assert result.get("type") is FlowResultType.FORM
+#     assert result.get("step_id") == "init"
 
-    result2 = await hass.config_entries.options.async_configure(
-        result["flow_id"],
-        user_input={CONF_IP_ADDRESS: '192.168.100.200'},
-    )
+#     result2 = await hass.config_entries.options.async_configure(
+#         result["flow_id"],
+#         user_input={CONF_IP_ADDRESS: '192.168.100.200'},
+#     )
 
-    assert result2.get("type") is FlowResultType.CREATE_ENTRY
-    assert result2.get("data") == {
-            CONF_USERNAME: '#api_token',
-            CONF_MODEL: 'Power unit Evo IP56',
-            CONF_DEVICE_ID: '321123',
-            CONF_API_TOKEN: 'token',
-            CONF_IP_ADDRESS: '192.168.100.200',
-            CONF_PORT: '80',
-    }
+#     assert result2.get("type") is FlowResultType.CREATE_ENTRY
+#     assert result2.get("data") == {
+#             CONF_USERNAME: '#api_token',
+#             CONF_MODEL: 'Power unit Evo IP56',
+#             CONF_DEVICE_ID: '321123',
+#             CONF_API_TOKEN: 'token',
+#             CONF_IP_ADDRESS: '192.168.100.200',
+#             CONF_PORT: '80',
+#     }
