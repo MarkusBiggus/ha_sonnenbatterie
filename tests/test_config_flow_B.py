@@ -1,7 +1,8 @@
 """Tests for the SonnenBatterie config flow.
     Using emulated sonnenbatterie driver package: sonnenbatterie_api_v2
     which uses API token via sonnen_api_v2 package. No support for user/pwassword authentication.
-"""
+    pytest 
+    """
 
 
 from unittest.mock import patch
