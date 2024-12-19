@@ -1,8 +1,10 @@
 """ pytest tests/test_config_flow_noinput.py -s -c
 """
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import patch, AsyncMock, MagicMock
 
 import pytest
+from sonnen_api_v2 import Batterie
+from . mock_sonnenbatterie_v2_charging import __mock_configurations
 
 #from custom_components.sonnenbatterie import async_setup_entry
 
@@ -41,7 +43,9 @@ async def test_show_form(hass: HomeAssistant) -> None:
 
 
 @pytest.mark.parametrize("ip_address", ["192.168.100.200"]) #, "192.168.88.11"])
-@pytest.mark.usefixtures("battery_charging")
+#@pytest.mark.usefixtures("battery_charging")
+#@pytest.mark.asyncio
+@patch.object(Batterie, 'fetch_configurations', __mock_configurations)
 async def test_token_create_entry(hass: HomeAssistant, ip_address: str) -> None:
     """Test that the token step works.
         fetch_configuration coroutine must be mocked so sonnenbatterie instantiation works
@@ -60,9 +64,9 @@ async def test_token_create_entry(hass: HomeAssistant, ip_address: str) -> None:
             CONF_DEVICE_ID: '321123',
             },
     )
-    print(f'result: {result}')
+#    print(f'result: {result}')
     assert result["type"] is FlowResultType.CREATE_ENTRY
-    assert result["title"] == (f'{ip_address}  (api token)')
+    assert result["title"] == (f'{ip_address} (api token)')
     assert result["data"][CONF_IP_ADDRESS] == ip_address # '192.168.100.200'
     assert result["data"][CONF_MODEL] == 'Power unit Evo IP56'
     assert result["data"][CONF_USERNAME] == '#api_token'
@@ -111,7 +115,7 @@ async def test_token_flow_works(hass: HomeAssistant, mock_discovery) -> None:
         },
     )
     assert result["type"] is FlowResultType.CREATE_ENTRY
-    assert result["title"] == "192.168.100.200  (api token)"
+    assert result["title"] == "192.168.100.200 (api token)"
     assert result["data"] == {
             CONF_IP_ADDRESS: '192.168.100.200',
             CONF_PORT: '80',
@@ -136,7 +140,7 @@ async def test_flow_user_step_no_input(hass: HomeAssistant):
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"], user_input={}
     )
-    assert result.get("title") == "192.168.100.200  (api token)"
+    assert result.get("title") == "192.168.100.200 (api token)"
     assert result.get("type") is FlowResultType.CREATE_ENTRY
     assert result["data"][CONF_IP_ADDRESS] == "192.168.100.200"
     assert result["result"].unique_id == "321123"
@@ -155,7 +159,7 @@ async def test_flow_user_step_no_input(hass: HomeAssistant):
 #         result["flow_id"], user_input={}
 #     )
 #     assert {"base": "missing"} == result["errors"]
-#     assert result.get("title") == "192.168.100.200  (api token)"
+#     assert result.get("title") == "192.168.100.200 (api token)"
 #     assert result.get("type") is FlowResultType.CREATE_ENTRY
 #     assert result["data"][CONF_IP_ADDRESS] == "192.168.1.123"
 #     assert result["result"].unique_id == "321123"
