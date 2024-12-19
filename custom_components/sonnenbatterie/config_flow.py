@@ -53,9 +53,11 @@ class SonnenbatterieFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         self.init_info = user_input
         # Return the form of the next step
         if use_token:
-            return await self.async_step_token()
+            token_input = user_input if CONF_API_TOKEN in user_input else None
+            return await self.async_step_token(token_input)
         else:
-            return await self.async_step_password()
+            password_input = user_input if CONF_PASSWORD in user_input else None
+            return await self.async_step_password(password_input)
 
     @callback
     def _show_form(self, errors=None):
@@ -94,11 +96,11 @@ class SonnenbatterieFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_create_entry(
             title=user_input[CONF_IP_ADDRESS] + ' (usr/pwd)',
             data={
+                CONF_IP_ADDRESS: ip_address,
+                CONF_PORT: ip_port,
                 'use_token': 'False',
                 CONF_USERNAME: username,
                 CONF_PASSWORD: password,
-                CONF_IP_ADDRESS: ip_address,
-                CONF_PORT: ip_port,
             },
         )
 
@@ -125,12 +127,12 @@ class SonnenbatterieFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         model_id = user_input[CONF_MODEL]
         device_id = user_input[CONF_DEVICE_ID]
 
-        def _internal_setup_v2(_username, _apitoken, _ipaddress, _ipport):
+        def _internal_setup(_username, _apitoken, _ipaddress, _ipport):
             return sonnenbatterie(_username, _apitoken, _ipaddress, _ipport) #API V2
 
         try:
             sonnenInst = await self.hass.async_add_executor_job(
-            _internal_setup_v2, username, api_token, ip_address, ip_port
+            _internal_setup, username, api_token, ip_address, ip_port
             )
 
         except Exception:
@@ -144,9 +146,9 @@ class SonnenbatterieFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_create_entry(
             title=user_input[CONF_IP_ADDRESS] + ' (api token)',
             data={
-                'use_token': 'True',
                 CONF_IP_ADDRESS: ip_address,
                 CONF_PORT: ip_port,
+                'use_token': 'True',
                 CONF_USERNAME: username,
                 CONF_API_TOKEN: api_token,
                 CONF_MODEL: model_id,

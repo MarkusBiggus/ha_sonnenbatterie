@@ -17,7 +17,7 @@ LOGGER_NAME = "sonnenapiv2"
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 @pytest.fixture(name="battery_charging")
-async def fixture_battery_charging(mocker = AsyncMock()):# -> sonnenbatterie:
+def fixture_battery_charging(mocker = AsyncMock()):# -> sonnenbatterie:
     if LOGGER_NAME is not None:
         logging.basicConfig(filename=(f'/tests/logs/{LOGGER_NAME}.log'), level=logging.DEBUG)
         logger = logging.getLogger(LOGGER_NAME)
