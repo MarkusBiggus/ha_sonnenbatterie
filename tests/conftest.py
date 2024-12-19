@@ -5,18 +5,18 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from custom_components.sonnenbatterie.const import DOMAIN
+# from custom_components.sonnenbatterie.const import DOMAIN
 
-from homeassistant.const import (
-    CONF_PASSWORD,
-    CONF_USERNAME,
-    CONF_IP_ADDRESS,
-    CONF_PORT,
-    CONF_SCAN_INTERVAL,
-    CONF_API_TOKEN,
-    CONF_DEVICE_ID,
-    CONF_MODEL
-)
+# from homeassistant.const import (
+#     CONF_PASSWORD,
+#     CONF_USERNAME,
+#     CONF_IP_ADDRESS,
+#     CONF_PORT,
+#     CONF_SCAN_INTERVAL,
+#     CONF_API_TOKEN,
+#     CONF_DEVICE_ID,
+#     CONF_MODEL
+# )
 
 #from tests.common import MockConfigEntry
 
