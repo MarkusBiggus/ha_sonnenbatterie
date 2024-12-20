@@ -38,6 +38,7 @@ class SonnenbatterieFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
     def __init__(self):
         """Initialize."""
+        self.user_info = {}
 
     async def async_step_user(self, user_input=None):
         """Handle a flow initialized by the user."""
@@ -48,16 +49,18 @@ class SonnenbatterieFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
         # ip_address = user_input[CONF_IP_ADDRESS]
         # ip_port = user_input[CONF_PORT]
-        use_token = user_input['use_token']
+        # use_token = user_input['use_token']
         # enable_debug = user_input['enable_debug']
-        self.init_info = user_input
-        # Return the form of the next step
-        if use_token:
-            token_input = user_input if CONF_API_TOKEN in user_input else None
-            return await self.async_step_token(token_input)
-        else:
-            password_input = user_input if CONF_PASSWORD in user_input else None
-            return await self.async_step_password(password_input)
+        # self.user_info = user_input
+        # # Return the form of the next step
+        # if use_token:
+        #     token_input = user_input if CONF_API_TOKEN in user_input else None
+        #     return await self.async_step_token(token_input)
+        # else:
+        #     password_input = user_input if CONF_PASSWORD in user_input else None
+        #     return await self.async_step_password(password_input)
+        self.user_info = user_input
+        return await self.async_step_progress()
 
     @callback
     def _show_form(self, errors=None):
@@ -71,11 +74,12 @@ class SonnenbatterieFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_password(self, user_input=None):
         """Handle a flow initialized by the user."""
         self.data_schema = CONFIG_SCHEMA_USER
+        LOGGER.info("async_step_password.")
         if not user_input:
             return self._show_form_A()
 
-        ip_address = self.init_info[CONF_IP_ADDRESS]
-        ip_port = self.init_info[CONF_PORT]
+        ip_address = self.user_info[CONF_IP_ADDRESS]
+#        ip_port = self.user_info[CONF_PORT]
         username = user_input[CONF_USERNAME]
         password = user_input[CONF_PASSWORD]
 
@@ -93,20 +97,27 @@ class SonnenbatterieFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             #    return self._show_form({"base": "invalid_credentials"})
             return self._show_form_A(errors={"base": "connection_error"})
 
-        return self.async_create_entry(
-            title=user_input[CONF_IP_ADDRESS] + ' (usr/pwd)',
-            data={
-                CONF_IP_ADDRESS: ip_address,
-                CONF_PORT: ip_port,
-                'use_token': 'False',
-                CONF_USERNAME: username,
-                CONF_PASSWORD: password,
-            },
+        self.title = user_input[CONF_IP_ADDRESS] + ' (usr/pwd)'
+        self.user_info.update(user_input)
+        return self.async_show_progress(
+            step_id="progress",
+            progress_action="Password",
         )
+        # return self.async_create_entry(
+        #     title=self.title,
+        #     data={
+        #         CONF_IP_ADDRESS: ip_address,
+        #         CONF_PORT: ip_port,
+        #         'use_token': False,
+        #         CONF_USERNAME: username,
+        #         CONF_PASSWORD: password,
+        #     },
+        # )
 
     @callback
     def _show_form_A(self, errors=None):
-        """Show the form to the user."""
+        """Show the password form to the user."""
+        LOGGER.info("Show password form to the user.")
         return self.async_show_form(
             step_id="password",
             data_schema=self.data_schema,
@@ -114,18 +125,20 @@ class SonnenbatterieFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         )
 
     async def async_step_token(self, user_input=None):
+#    ) -> config_entries.ConfigFlowResult:
         """Handle a flow initialized by the user."""
         self.data_schema = CONFIG_SCHEMA_TOKEN
+        LOGGER.info("async_step_token.")
 
         if not user_input:
             return self._show_form_B()
 
         username = '#api_token'
-        ip_address = self.init_info[CONF_IP_ADDRESS]
-        ip_port = self.init_info[CONF_PORT]
+        ip_address = self.user_info[CONF_IP_ADDRESS]
+        ip_port = self.user_info[CONF_PORT]
         api_token = user_input[CONF_API_TOKEN]
-        model_id = user_input[CONF_MODEL]
-        device_id = user_input[CONF_DEVICE_ID]
+        # model_id = user_input[CONF_MODEL]
+        # device_id = user_input[CONF_DEVICE_ID]
 
         def _internal_setup(_username, _apitoken, _ipaddress, _ipport):
             return sonnenbatterie(_username, _apitoken, _ipaddress, _ipport) #API V2
@@ -142,27 +155,89 @@ class SonnenbatterieFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             # if ex.errcode == 400:
             #    return self._show_form({"base": "invalid_credentials"})
             return self._show_form_B(errors={"base": "connection_error"})
-
-        return self.async_create_entry(
-            title=user_input[CONF_IP_ADDRESS] + ' (api token)',
-            data={
-                CONF_IP_ADDRESS: ip_address,
-                CONF_PORT: ip_port,
-                'use_token': 'True',
-                CONF_USERNAME: username,
-                CONF_API_TOKEN: api_token,
-                CONF_MODEL: model_id,
-                CONF_DEVICE_ID: device_id,
-            },
+        self.title = user_input[CONF_IP_ADDRESS] + ' (api token)'
+        self.user_info.update(user_input)
+        return self.async_show_progress(
+            step_id="progress",
+            progress_action="Token.",
         )
+        # return self.async_create_entry(
+        #     title=self.title,
+        #     data={
+        #         CONF_IP_ADDRESS: ip_address,
+        #         CONF_PORT: ip_port,
+        #         'use_token': True,
+        #         CONF_USERNAME: username,
+        #         CONF_API_TOKEN: api_token,
+        #         CONF_MODEL: model_id,
+        #         CONF_DEVICE_ID: device_id,
+        #     },
+        # )
 
     @callback
     def _show_form_B(self, errors=None):
         """Show token form to the user."""
+        LOGGER.info("Show token form to the user.")
         return self.async_show_form(
             step_id="token",
             data_schema=self.data_schema,
             errors=errors if errors else {},
+        )
+
+    async def async_step_progress(
+        self, user_input: str | None = None
+    ) -> config_entries.ConfigFlowResult:
+        """Displaying progress for two tasks"""
+        LOGGER.info("async_step_progress")
+        # if not self.task_one or not self.task_two:
+        #     if not self.task_one:
+        #         task = asyncio.sleep(10)
+        #         LOGGER.info("scheduling task1")
+        #         self.task_one = self.hass.async_create_task(self._async_do_task(task))
+        #         progress_action = "task_one"
+        #     else:
+        #         task = asyncio.sleep(10)
+        #         LOGGER.info("scheduling task2")
+        #         self.task_two = self.hass.async_create_task(self._async_do_task(task))
+        #         progress_action = "task_two"
+        #     LOGGER.info("showing_progress: %s", progress_action)
+        #     return self.async_show_progress(
+        #         step_id="progress",
+        #         progress_action=progress_action,
+
+        #     )
+        # if CONF_API_TOKEN in self.user_info or CONF_PASSWORD in self.user_info:
+        #     LOGGER.info("async_step_progress - all tasks done")
+        #     return self.async_show_progress_done(next_step_id="finish")
+
+        user_input = self.user_info
+        # Return the form of the next step
+        if user_input['use_token']:
+            token_input = user_input if CONF_API_TOKEN in user_input else None
+            await self.async_step_token(token_input)
+        else:
+            password_input = user_input if CONF_PASSWORD in user_input else None
+            await self.async_step_password(password_input)
+
+        LOGGER.info("async_step_progress - all tasks done")
+        return self.async_show_progress_done(next_step_id="finish")
+
+    # async def _async_do_task(self, task):
+    #     LOGGER.info("task pre")
+    #     await task  # A task that take some time to complete.
+    #     LOGGER.info("task done")
+    #     # Ensure we go back to the flow
+    #     self.hass.async_create_task(
+    #         self.hass.config_entries.flow.async_configure(flow_id=self.flow_id)
+    #     )
+
+    async def async_step_finish(
+        self, user_input: str | None = None
+    ) -> config_entries.ConfigFlowResult:
+        LOGGER.info("async_step_finish")
+        return self.async_create_entry(
+            title=self.title,
+            data=self.user_info,
         )
 
     # async def async_step_import(self, import_config):

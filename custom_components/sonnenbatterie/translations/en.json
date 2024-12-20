@@ -51,7 +51,17 @@
                     "username": "User",
                     "password": "Password"
                 }
+            },
+            "progress":{
+            "title": "Progress step",
+            "description":"Progress step description"
             }
+        },
+        "progress": {
+            "user": "Device network details",
+            "token": "Device API token",
+            "password": "Device user/password",
+            "finish": "Finished"
         }
     },
     "options": {
