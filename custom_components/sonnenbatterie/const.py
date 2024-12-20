@@ -40,7 +40,7 @@ CONFIG_SCHEMA_BASE = vol.Schema(
     }
 )
 
-CONFIG_SCHEMA_USER = vol.Schema(
+CONFIG_SCHEMA_PASSWORD = CONFIG_SCHEMA_BASE.extend(
     {
     vol.Required(CONF_USERNAME): selector(
         {
@@ -53,10 +53,8 @@ CONFIG_SCHEMA_USER = vol.Schema(
     }
 )
 
-CONFIG_SCHEMA_TOKEN = vol.Schema(
+CONFIG_SCHEMA_TOKEN = CONFIG_SCHEMA_BASE.extend(
     {
-#    vol.Optional(CONF_USERNAME, default='*api_token*'): cv.string,
-#    vol.Optional(CONF_PASSWORD): cv.string,
     vol.Required(CONF_API_TOKEN): cv.string,
     vol.Required(CONF_MODEL): cv.string,
     vol.Required(CONF_DEVICE_ID): cv.string,

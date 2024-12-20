@@ -8,7 +8,7 @@ from . mock_sonnenbatterie_v2_charging import __mock_configurations
 
 #from custom_components.sonnenbatterie import async_setup_entry
 
-from custom_components.sonnenbatterie.const import DOMAIN, CONFIG_SCHEMA_BASE
+from custom_components.sonnenbatterie.const import DOMAIN, CONFIG_SCHEMA_BASE, CONFIG_SCHEMA_TOKEN
 
 from homeassistant.config_entries import SOURCE_USER
 from homeassistant.const import (
@@ -86,13 +86,14 @@ async def test_token_create_entry(hass: HomeAssistant, ip_address: str) -> None:
 
 
 #@pytest.mark.usefixtures("mock_default_requests")
+@pytest.mark.parametrize("ip_address", ["192.168.100.200"]) #, "192.168.88.11"])
 @patch.object(Batterie, 'fetch_configurations', __mock_configurations)
-async def test_token_flow_works(hass: HomeAssistant) -> None:
+async def test_token_flow_works(hass: HomeAssistant, ip_address) -> None:
     """Test config flow."""
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": SOURCE_USER}
     )
-#    print(f'result: {result}')
+    print(f'result: {result}')
     assert result["type"] is FlowResultType.FORM
     assert result["step_id"] == "user"
     assert result["data_schema"] == CONFIG_SCHEMA_BASE
@@ -103,12 +104,25 @@ async def test_token_flow_works(hass: HomeAssistant) -> None:
             CONF_IP_ADDRESS: '192.168.100.200',
             CONF_PORT: '80',
             'use_token': True,
-            # CONF_API_TOKEN: 'token',
-            # CONF_MODEL: 'Power unit Evo IP56',
-            # CONF_DEVICE_ID: '321123',
         },
     )
+
     print(f'result: {result}')
+    assert result["type"] is FlowResultType.FORM
+    assert result["step_id"] == "token"
+    assert result["data_schema"] == CONFIG_SCHEMA_TOKEN
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"],
+        user_input={
+            CONF_IP_ADDRESS: '192.168.100.200',
+            CONF_PORT: '80',
+            'use_token': True,
+            CONF_API_TOKEN: 'token',
+            CONF_MODEL: 'Power unit Evo IP56',
+            CONF_DEVICE_ID: '321123',
+        },
+    )
+
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert result["title"] == "192.168.100.200 (api token)"
     assert result["data"] == {
@@ -122,12 +136,12 @@ async def test_token_flow_works(hass: HomeAssistant) -> None:
     }
 
 
-@pytest.mark.usefixtures("mock_setup_entry", "mock_sonnenbatterie")
 async def test_flow_user_step_no_input(hass: HomeAssistant):
     """Test appropriate error when no input is provided."""
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": SOURCE_USER}
     )
+    print(f'result: {result}')
     assert {"base": "missing"} == result["errors"]
     assert result.get("step_id") == "user"
     assert result.get("type") is FlowResultType.FORM
@@ -135,6 +149,7 @@ async def test_flow_user_step_no_input(hass: HomeAssistant):
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"], user_input={}
     )
+    print(f'result: {result}')
     assert result.get("title") == "192.168.100.200 (api token)"
     assert result.get("type") is FlowResultType.CREATE_ENTRY
     assert result["data"][CONF_IP_ADDRESS] == "192.168.100.200"
